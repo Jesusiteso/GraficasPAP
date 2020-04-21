@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" align=center>
     <Grafico/>
   </div>
 </template>
@@ -23,5 +23,9 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  height: 1000px;
+  width: 846px;
+  align-content: center;
+  align-self: center;
 }
 </style>

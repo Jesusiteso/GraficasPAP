@@ -79,6 +79,7 @@ export default {
             ultimasLecturas: null,
 
             texto_lapso_de_muestra: null,
+            tipo_de_lapso: 'dia',
             
         }
     },
@@ -240,6 +241,7 @@ export default {
         },
         actualizarPorDia(){
             let date = document.getElementById('dia').value;
+            this.tipo_de_lapso = 'dia';
 
             axios.get(`${this.urlApi}/day/${this.nodo_seleccionado}/${parseInt(date.substr(0,4))}/${parseInt(date.substr(5,2))}/${parseInt(date.substr(8,2))}`).then( response => {
                 let total_data = response.data;
@@ -288,6 +290,7 @@ export default {
         },
         actualizarPorSemana(){
             let date = document.getElementById('semana').value;
+            this.tipo_de_lapso = 'semana';
 
             axios.get(`${this.urlApi}/week/${this.nodo_seleccionado}/${parseInt(date.substr(0,4))}/${parseInt(date.substr(5,2))}/${parseInt(date.substr(8,2))}`).then( response => {
                 let total_data = response.data;
@@ -335,6 +338,7 @@ export default {
         },
         actualizarPorMes(){
             let date = document.getElementById('mes').value;
+            this.tipo_de_lapso = 'mes';
 
             axios.get(`${this.urlApi}/month/${this.nodo_seleccionado}/${parseInt(date.substr(0,4))}/${parseInt(date.substr(5,2))}`).then( response => {
                 let total_data = response.data;
@@ -382,6 +386,7 @@ export default {
         },
         actualizarPorAnio(){
             let date = document.getElementById('anio').value;
+            this.tipo_de_lapso = 'anio';
 
             axios.get(`${this.urlApi}/year/${this.nodo_seleccionado}/${parseInt(date.substr(0,4))}`).then( response => {
                 let total_data = response.data;
@@ -431,6 +436,7 @@ export default {
             let inicio = this.lecturas_por_nodo[0].fecha_hora;
             let fin = this.lecturas_por_nodo[this.lecturas_por_nodo.length-1].fecha_hora;
 
+
             switch( inicio.substr(5,2) ){
                 case '01': inicio = `${inicio.substr(8,2)} de Enero del ${inicio.substr(0,4)}`; break;
                 case '02': inicio = `${inicio.substr(8,2)} de Febrero del ${inicio.substr(0,4)}`; break;
@@ -446,6 +452,11 @@ export default {
                 case '12': inicio = `${inicio.substr(8,2)} de Diciembre del ${inicio.substr(0,4)}`; break;
             }
 
+            if( this.tipo_de_lapso.localeCompare('dia') == 0 ){
+                this.texto_lapso_de_muestra = inicio;
+            }else{
+                
+
             switch( fin.substr(5,2) ){
                 case '01': fin = `${fin.substr(8,2)} de Enero del ${fin.substr(0,4)}`; break;
                 case '02': fin = `${fin.substr(8,2)} de Febrero del ${fin.substr(0,4)}`; break;
@@ -459,9 +470,17 @@ export default {
                 case '10': fin = `${fin.substr(8,2)} de Octubre del ${fin.substr(0,4)}`; break;
                 case '11': fin = `${fin.substr(8,2)} de Noviembre del ${fin.substr(0,4)}`; break;
                 case '12': fin = `${fin.substr(8,2)} de Diciembre del ${fin.substr(0,4)}`; break;
-            }
+                }
 
             this.texto_lapso_de_muestra = `${inicio} al ${fin}`
+
+            }
+
+            
+
+            
+
+            
 
 
         }
