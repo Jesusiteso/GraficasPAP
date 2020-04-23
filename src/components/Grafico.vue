@@ -34,17 +34,23 @@
 
         <table id="table-variables" align="center">
             <tr>
-                <td @click="cargarDatosEnGrafico(variables)"
+                <td @click="cargarDatosEnGrafico(variables.nombre)"
                     v-for="variables in tableVariables1"
-                    :key="variables">
-                {{ variables }}
+                    :key="variables.id">
+
+                <div class="celda-variable-nombre">{{ variables.nombre }}</div>
+                <div class="celda-variable-lectura">{{ variables.lectura}}</div>
+                
+                
+                <!-- {{ ultimasLecturas[variables] }} -->
                 </td>
             </tr>
             <tr>
-                <td @click="cargarDatosEnGrafico(variables)"
+                <td @click="cargarDatosEnGrafico(variables.nombre)"
                     v-for="variables in tableVariables2"
-                    :key="variables">
-                {{ variables }}
+                    :key="variables.id">
+                <div class="celda-variable-nombre">{{ variables.nombre }}</div>
+                <div class="celda-variable-lectura">{{ variables.lectura}}</div>
                 </td><br>
             </tr>
         </table>
@@ -87,11 +93,11 @@ export default {
         this.obtenerNombreDeNodos();
         this.obtenerNombreDeVariables();
 
-        this.nodo_seleccionado = (window.location.href.includes('#'))
-                                    ? this.nodo_seleccionado = window.location.href.substr(window.location.href.indexOf('#')+1) 
-                                    : null;
+        // this.nodo_seleccionado = (window.location.href.includes('#'))
+        //                             ? this.nodo_seleccionado = window.location.href.substr(window.location.href.indexOf('#')+1) 
+        //                             : null;
 
-        this.obtenerUltimaLectura();
+        // this.obtenerUltimaLectura();
 
         // this.nodo_seleccionado = window.location.href.substr(window.location.href.indexOf('#')+1);
         // console.log('->>>'+this.nodo_seleccionado);
@@ -113,6 +119,12 @@ export default {
                 let variables = [];
                 response.data.forEach(element => variables.push({code: element.code, nombre: element.description}) );
                 this.lista_de_variables = variables;
+
+                this.nodo_seleccionado = (window.location.href.includes('#'))
+                                    ? this.nodo_seleccionado = window.location.href.substr(window.location.href.indexOf('#')+1) 
+                                    : null;
+
+                this.obtenerUltimaLectura();
             }).catch( e => {
                 console.log(e)
             })
@@ -134,32 +146,54 @@ export default {
                 }
 
                 let variablesDelNodo = [];
+                let codeVariablesDelNodo = [];
                 for( let i = 0 ; i < this.lista_de_variables.length ; i++){
                     if( Object.prototype.hasOwnProperty.call(lastread, this.lista_de_variables[i].code) ){
                         variablesDelNodo.push(this.lista_de_variables[i].nombre);
+                        codeVariablesDelNodo.push(this.lista_de_variables[i].code);
                     }
                 }
 
                 this.tableVariables1 = [];
                 this.tableVariables2 = [];
                 this.ultimasLecturas = [];
+                
                 for( let i = 0 ; i < variablesDelNodo.length ; i++){
 
+                    let tempJson = {};
+
                     if(i < 4 ){
-                        this.tableVariables1.push(variablesDelNodo[i]); 
+                        tempJson.id = i;
+                        tempJson.nombre = variablesDelNodo[i];
+                        tempJson.lectura = lastread[codeVariablesDelNodo[i]]
+                        this.tableVariables1.push(tempJson);
+                        // this.tableVariables1.push(variablesDelNodo[i]); 
                     }else{
-                        this.tableVariables2.push(variablesDelNodo[i]); 
+                        tempJson.id = i;
+                        tempJson.nombre = variablesDelNodo[i];
+                        tempJson.lectura = lastread[codeVariablesDelNodo[i]]
+                        this.tableVariables2.push(tempJson);
+                        // this.tableVariables2.push(variablesDelNodo[i]); 
                     }
-                    this.ultimasLecturas.push(lastread[variablesDelNodo[i]]);
+                    
+                    // tempJson[variablesDelNodo[i]] = lastread[codeVariablesDelNodo[i]];
+                    // this.ultimasLecturas.push( tempJson );
+                    // console.log(lastread[])
+                    // console.log(variablesDelNodo);
                 }
+                
                 for( let i = 0 ; i < 4 ; i++){
                     if( this.tableVariables1.length < 4 ){
-                        this.tableVariables1.push(null);
+                        this.tableVariables1.push({nombre: ' ' , lectura: null});
                     }
                     if( this.tableVariables2.length < 4 ){
-                        this.tableVariables2.push(null);
+                        this.tableVariables2.push({nombre: ' ' , lectura: null});
                     }
                 }
+
+                console.table(this.tableVariables1);
+                console.log('----------------')
+                console.log(this.ultimasLecturas);
 
 
                 axios.get(`${this.urlApi}/day/${this.nodo_seleccionado}/${parseInt(lastdate.substr(0,4))}/${parseInt(lastdate.substr(5,2))}/${parseInt(lastdate.substr(8,2))}`).then( responseofday => {
@@ -193,8 +227,8 @@ export default {
 
 
 
-                    console.log(this.lista_variables_por_nodo)
-                    console.log(this.lecturas_por_nodo);
+                    // console.log(this.lista_variables_por_nodo);
+                    // console.log(this.lecturas_por_nodo);
                 }else{
                     this.lista_variables_por_nodo = null;
                     // alert('No hay ninguna lectura del nodo');
@@ -210,6 +244,7 @@ export default {
         cargarDatosEnGrafico(nombrevariable){
 
             if( nombrevariable == null) return;
+            if( nombrevariable.localeCompare(' ') == 0) return;
 
             this.variable_seleccionada = nombrevariable;
             let codevariable;
@@ -533,8 +568,37 @@ label{
     font: bold;
     font-size: x-large;
 }
+
+#table-variables td{
+    align-content: center;
+    align-items: center;
+    align-self: auto;
+}
+#table-variables div.celda-variable-nombre{
+    height: 50%;
+}
+#table-variables div.celda-variable-lectura{
+    display: inline-block;
+    border-radius: 15px;
+    background-color: #ffffff;
+    color: #707070;
+    width: 70%;
+    /* width: 80%; */
+    /* margin: 50px; */
+    /* border: none; */
+    /* margin: 0px; */
+    /* padding: 0px 0px 0px 0px; */
+    /* inline-size: 80%; */
+    /* border:  solid red 2px; */
+    /* margin: solid red 2px; */
+    align-self: auto;
+    /* border-collapse: separate; */
+}
 #table-variables button{
-    border-radius: 12px;
+    border-radius: 15px;
+}
+#table-variables button:empty {
+   display: none;
 }
 /* filas */
 #table-variables tr td{ 
