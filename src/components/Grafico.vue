@@ -29,29 +29,34 @@
 
         <div class="chart-container">
             <Chart :chart-data="datacollection"></Chart>
+            <!-- :options="dataOptions"></Chart> -->
         </div>
 
 
         <table id="table-variables" align="center">
             <tr>
+
+                
                 <td @click="cargarDatosEnGrafico(variables.nombre)"
+                    v-on:click="pushed"
                     v-for="variables in tableVariables1"
                     :key="variables.id">
 
                 <div class="celda-variable-nombre">{{ variables.nombre }}</div>
                 <div class="celda-variable-lectura">{{ variables.lectura}}</div>
                 
-                
-                <!-- {{ ultimasLecturas[variables] }} -->
                 </td>
             </tr>
             <tr>
+
                 <td @click="cargarDatosEnGrafico(variables.nombre)"
+                    v-on:click="pushed"
                     v-for="variables in tableVariables2"
                     :key="variables.id">
                 <div class="celda-variable-nombre">{{ variables.nombre }}</div>
                 <div class="celda-variable-lectura">{{ variables.lectura}}</div>
-                </td><br>
+                </td>
+
             </tr>
         </table>
 
@@ -70,6 +75,7 @@ export default {
         return{
             urlApi: 'http://papvidadigital-test.com/test',
             datacollection: null,
+            // dataOptions: null,
 
             lista_de_nodos: null,
             lista_de_variables: null,
@@ -85,6 +91,7 @@ export default {
             ultimasLecturas: null,
 
             texto_lapso_de_muestra: null,
+            labels_lapso: null,
             tipo_de_lapso: 'dia',
             
         }
@@ -92,6 +99,8 @@ export default {
     mounted(){
         this.obtenerNombreDeNodos();
         this.obtenerNombreDeVariables();
+
+
 
         // this.nodo_seleccionado = (window.location.href.includes('#'))
         //                             ? this.nodo_seleccionado = window.location.href.substr(window.location.href.indexOf('#')+1) 
@@ -103,6 +112,17 @@ export default {
         // console.log('->>>'+this.nodo_seleccionado);
         // console.log(this.lista_de_nodos);
         // console-log(this.lista_de_variables);
+
+        // this.dataOptions = {
+        //     legend: {
+        //         labels: {
+        //         // This more specific font property overrides the global property
+        //         fontColor: 'yellow'
+        //         }
+        //     }
+        // }
+        
+
     },
     methods: {
         obtenerNombreDeNodos(){
@@ -191,9 +211,15 @@ export default {
                     }
                 }
 
-                console.table(this.tableVariables1);
-                console.log('----------------')
-                console.log(this.ultimasLecturas);
+                // console.table(this.tableVariables1);
+                // console.log('----------------')
+                // console.log(this.ultimasLecturas);
+                // console.log('ultima lectura');
+                // console.log(this.tableVariables1[0].nombre);
+
+                // this.cargarDatosEnGrafico(this.tableVariables1[0].nombre);
+                this.tipo_de_lapso = 'dia';
+
 
 
                 axios.get(`${this.urlApi}/day/${this.nodo_seleccionado}/${parseInt(lastdate.substr(0,4))}/${parseInt(lastdate.substr(5,2))}/${parseInt(lastdate.substr(8,2))}`).then( responseofday => {
@@ -226,6 +252,22 @@ export default {
                     });
 
 
+                    this.cargarDatosEnGrafico(this.tableVariables1[0].nombre);
+                    // console.log('buen');
+                    // console.log(this.lecturas_por_nodo);
+
+                    // console.log('testing');
+
+
+                    // console.log(self.document.getElementById('table-variables').rows[0].children[0]);
+                    
+                    document.getElementById('table-variables').rows[0].children[0].style.background = 'radial-gradient(circle, rgba(26,33,54,1) 0%, rgba(101,101,103,1) 82%)'
+
+                    
+                    // this.cargarDatosEnGrafico(this.lista_variables_por_nodo[0]);
+                    // console.log('buen test');
+                    // console.log(this.lista_variables_por_nodo[0]);
+
 
                     // console.log(this.lista_variables_por_nodo);
                     // console.log(this.lecturas_por_nodo);
@@ -242,7 +284,6 @@ export default {
             });
         },
         cargarDatosEnGrafico(nombrevariable){
-
             if( nombrevariable == null) return;
             if( nombrevariable.localeCompare(' ') == 0) return;
 
@@ -253,13 +294,16 @@ export default {
                 if( elem.nombre.localeCompare(nombrevariable) == 0 ) codevariable = elem.code;
             });
 
-            let labels_lectura = this.lecturas_por_nodo.map( elem => {return elem.fecha_hora});
+            this.labels_lapso = this.lecturas_por_nodo.map( elem => {return elem.fecha_hora});
+
+            // let labels_lectura = this.lecturas_por_nodo.map( elem => {return elem.fecha_hora});
+
             let data_lectura = this.lecturas_por_nodo.map( elem => {return elem[codevariable]} );
 
             this.formatoLapsoTiempo();
 
             this.datacollection = {
-                labels: labels_lectura,
+                labels: this.labels_lapso,
                 datasets: [
                     {
                         label: nombrevariable,
@@ -505,10 +549,61 @@ export default {
                 case '10': fin = `${fin.substr(8,2)} de Octubre del ${fin.substr(0,4)}`; break;
                 case '11': fin = `${fin.substr(8,2)} de Noviembre del ${fin.substr(0,4)}`; break;
                 case '12': fin = `${fin.substr(8,2)} de Diciembre del ${fin.substr(0,4)}`; break;
-                }
+            }
+
+
+            
 
             this.texto_lapso_de_muestra = `${inicio} al ${fin}`
 
+            }
+
+            // 2020-02-18T06:05:05
+            //Labels data formating
+            // let fecheTemporal = new Date(this.labels_lapso[0].substr(0,19));
+            // let weekday = fecheTemporal.getDay();
+
+            // switch( weekday ){
+            //     case 1: return 'Lunes'; break;
+            //     case 2: return 'Martes'; break;
+            //     case 3: return 'Miercoles'; break;
+            //     case 4: return 'Jueves'; break;
+            //     case 5: return 'Viernes'; break;
+            //     case 6: return 'Sabado'; break;
+            //     case 0: return 'Domingo'; break;
+            // }
+
+
+            // console.log(fecheTemporal);
+            // console.log(fecheTemporal.getDay());
+
+            let tempDate;
+            let tempweekday;
+            // console.log(this.labels_lapso);
+
+            if( this.tipo_de_lapso.localeCompare('dia') == 0){
+                // console.log('entro al formato');
+                this.labels_lapso = this.labels_lapso.map(elem => `${elem.substr(11,8)}`);
+                // this.labels_lapso = this.labels_lapso.map(elem => `${elem.substr(0,10)}`);
+            }else if( this.tipo_de_lapso.localeCompare('semana') == 0){
+                this.labels_lapso = this.labels_lapso.map(elem => {
+
+                    tempDate = new Date(elem.substr(0,19));
+                    tempweekday = tempDate.getDay();
+
+                    switch( tempweekday ){
+                        case 1: return 'Lunes '+ elem.substr(17,2);    
+                        case 2: return 'Martes '+ elem.substr(17,2);   
+                        case 3: return 'Miercoles '+ elem.substr(17,2);
+                        case 4: return 'Jueves '+ elem.substr(17,2);   
+                        case 5: return 'Viernes '+ elem.substr(17,2);  
+                        case 6: return 'Sabado '+ elem.substr(17,2);   
+                        case 0: return 'Domingo '+ elem.substr(17,2);  
+                }
+                    
+                    });
+            }else{
+                this.labels_lapso = this.labels_lapso.map(elem => `${elem.substr(0,10)}`);
             }
 
             
@@ -518,8 +613,55 @@ export default {
             
 
 
-        }
+        },
+        pushed(){
+            // console.log(event.target.parentNode.tagName);
+            // console.log(event.target.parentNode.innerText);
 
+            // console.log(event.target.parentNode.style.background);
+            // if( event.target.parentNode.style.background.localeCompare('radial-gradient(circle, rgb(26, 33, 54) 0%, rgb(101, 101, 103) 82%)') == 0){
+            //     event.target.parentNode.style.background = '';
+            // }else{
+            //     // event.target.parentNode.style.backgroundColor = "rgb(101, 101, 103)";
+            //     console.log('entro');
+            //     event.target.parentNode.style.background = 'radial-gradient(circle, rgba(26,33,54,1) 0%, rgba(101,101,103,1) 82%)'
+            // }
+
+            // console.log(event.target.parentNode);
+            
+            // console.log(event.target.parentNode.style.backgroundColor);
+            // console.log(event.target.parentNode.parentNode.parentNode.rows[0].children[0].style.background);
+            // event.target.style.visibility = 'hidden';
+
+            if( event.target.parentNode.tagName.localeCompare('TD') == 0 && event.target.parentNode.innerText.localeCompare('') != 0){
+                // console.log('Se arma');
+                
+
+                event.target.parentNode.parentNode.parentNode.rows[0].children[0].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[0].children[1].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[0].children[2].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[0].children[3].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[1].children[0].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[1].children[1].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[1].children[2].style.background = '';
+                event.target.parentNode.parentNode.parentNode.rows[1].children[3].style.background = '';
+
+
+                // console.log(event.target.parentNode.parentNode.parentNode.rows[0].children);
+                
+                if( event.target.parentNode.style.background.localeCompare('radial-gradient(circle, rgb(26, 33, 54) 0%, rgb(101, 101, 103) 82%)') == 0){
+                    event.target.parentNode.style.background = '';
+                }else{
+                    // event.target.parentNode.style.backgroundColor = "rgb(101, 101, 103)";
+                    // console.log('entro');
+                    event.target.parentNode.style.background = 'radial-gradient(circle, rgba(26,33,54,1) 0%, rgba(101,101,103,1) 82%)'
+                }
+
+            }else{
+                // console.log('No se arma');
+            }
+
+        }
 
 
     }
@@ -550,7 +692,7 @@ label{
     background: black;
 } */
 .app-container{
-    background: rgb(28,29,33);
+    /* background: rgb(28,29,33); */
     background: radial-gradient(circle, rgba(28,29,33,1) 0%, rgba(33,34,37,1) 36%, rgba(0,0,0,1) 100%);
 
 }
@@ -574,6 +716,12 @@ label{
     align-items: center;
     align-self: auto;
 }
+
+/* #table-variables td:checked{
+    color: red;
+    background-color: greenyellow;
+} */
+
 #table-variables div.celda-variable-nombre{
     height: 50%;
 }
@@ -583,16 +731,7 @@ label{
     background-color: #ffffff;
     color: #707070;
     width: 70%;
-    /* width: 80%; */
-    /* margin: 50px; */
-    /* border: none; */
-    /* margin: 0px; */
-    /* padding: 0px 0px 0px 0px; */
-    /* inline-size: 80%; */
-    /* border:  solid red 2px; */
-    /* margin: solid red 2px; */
     align-self: auto;
-    /* border-collapse: separate; */
 }
 #table-variables button{
     border-radius: 15px;
@@ -611,5 +750,9 @@ label{
     height: 168px;
     width: 182px;
 }
+
+/* #table-variables tr:first-child td:first-child{
+    background: radial-gradient(circle, rgb(26, 33, 54) 0%, rgb(101, 101, 103) 82%);
+} */
 
 </style>

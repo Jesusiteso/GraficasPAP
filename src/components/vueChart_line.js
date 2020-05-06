@@ -9,11 +9,20 @@ export default {
     chartData: {
       type: Object,
       default: null
+    },
+    options:{
+      legend: {
+        hidden: true,
+        labels: {
+          fontColor: 'yellow'
+        }
+      }
     }
   },
   mounted () {
     // this.chartData is created in the mixin.
     // If you want to pass options please create a local options object
+
     this.renderChart(this.chartData, this.options)
   }
 }
